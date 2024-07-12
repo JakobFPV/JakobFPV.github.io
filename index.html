@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Relative Windrichtung berechnen</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        canvas {
+            border: 1px solid black;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relative Windrichtung berechnen</h1>
+    <label for="boatSpeed">Fahrgeschwindigkeit (kn):</label>
+    <input type="number" id="boatSpeed" step="any"><br><br>
+    
+    <label for="windSpeed">Windgeschwindigkeit (kn):</label>
+    <input type="number" id="windSpeed" step="any"><br><br>
+    
+    <label for="windAngle">Windwinkel zum Boot (Grad):</label>
+    <input type="number" id="windAngle"><br><br>
+    
+    <button onclick="calculateAndDraw()">Berechnen und Zeichnen</button>
+    
+    <canvas id="canvas" width="600" height="600"></canvas>
+    
+    <script>
+        function calculateAndDraw() {
+            const boatSpeed = parseFloat(document.getElementById('boatSpeed').value);
+            const windSpeed = parseFloat(document.getElementById('windSpeed').value);
+            const windAngle = parseFloat(document.getElementById('windAngle').value);
+            
+            if (isNaN(boatSpeed) || isNaN(windSpeed) || isNaN(windAngle)) {
+                alert("Bitte alle Felder korrekt ausfüllen.");
+                return;
+            }
+            
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Center of the canvas
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            // Draw boat direction (to the right, in black)
+            const boatEndX = centerX + boatSpeed * 10;
+            const boatEndY = centerY;
+            drawArrow(ctx, centerX, centerY, boatEndX, boatEndY, 'black');
+            ctx.fillStyle = 'black';
+            ctx.font = '16px Arial';
+            ctx.fillText(`Fahrtrichtung`, boatEndX + 10, boatEndY - 20);
+            ctx.fillText(`Speed: ${boatSpeed} kn`, boatEndX + 10, boatEndY - 5);
+            ctx.fillText(`Angle: 0°`, boatEndX + 10, boatEndY + 10);
+
+            // Draw wind direction (pointing to the boat)
+            const windEndX = centerX - windSpeed * 10 * Math.cos(windAngle * Math.PI / 180);
+            const windEndY = centerY - windSpeed * 10 * Math.sin(windAngle * Math.PI / 180);
+            drawArrow(ctx, windEndX, windEndY, centerX, centerY, 'red');
+            ctx.fillStyle = 'red';
+            ctx.fillText(`Windrichtung`, windEndX - 70, windEndY - 20);
+            ctx.fillText(`Speed: ${windSpeed} kn`, windEndX - 70, windEndY - 5);
+            ctx.fillText(`Angle: ${windAngle}°`, windEndX - 70, windEndY + 10);
+
+            // Calculate and draw relative wind direction
+            const relWindX = windSpeed * Math.cos(windAngle * Math.PI / 180) - boatSpeed;
+            const relWindY = windSpeed * Math.sin(windAngle * Math.PI / 180);
+            const relWindAngle = Math.atan2(relWindY, relWindX) * 180 / Math.PI;
+            const relWindSpeed = Math.sqrt(relWindX * relWindX + relWindY * relWindY);
+            const relWindEndX = centerX - relWindX * 10;
+            const relWindEndY = centerY - relWindY * 10;
+            drawArrow(ctx, relWindEndX, relWindEndY, centerX, centerY, 'green');
+            ctx.fillStyle = 'green';
+            ctx.fillText(`Relativer Wind`, relWindEndX - 100, relWindEndY - 20);
+            ctx.fillText(`Speed: ${relWindSpeed.toFixed(2)} kn`, relWindEndX - 100, relWindEndY - 5);
+            ctx.fillText(`Angle: ${relWindAngle.toFixed(2)}°`, relWindEndX - 100, relWindEndY + 10);
+        }
+
+        function drawArrow(context, fromX, fromY, toX, toY, color) {
+            const headlen = 10; // length of head in pixels
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const angle = Math.atan2(dy, dx);
+
+            context.beginPath();
+            context.moveTo(fromX, fromY);
+            context.lineTo(toX, toY);
+            context.strokeStyle = color;
+            context.lineWidth = 4;
+            context.stroke();
+
+            context.beginPath();
+            context.moveTo(toX, toY);
+            context.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            context.lineTo(toX - headlen * Math.cos(angle + Math.PI / 6), toY - headlen * Math.sin(angle + Math.PI / 6));
+            context.lineTo(toX, toY);
+            context.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
+            context.strokeStyle = color;
+            context.lineWidth = 4;
+            context.stroke();
+            context.fillStyle = color;
+            context.fill();
+        }
+    </script>
+</body>
+</html>
