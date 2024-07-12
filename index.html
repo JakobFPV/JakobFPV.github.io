@@ -23,7 +23,7 @@
     <label for="windSpeed">Windgeschwindigkeit (kn):</label>
     <input type="number" id="windSpeed" step="any"><br><br>
     
-    <label for="windAngle">Windwinkel zum Boot (Grad):</label>
+    <label for="windAngle">Windwinkel (Kompassgrad):</label>
     <input type="number" id="windAngle"><br><br>
     
     <button onclick="calculateAndDraw()">Berechnen und Zeichnen</button>
@@ -59,26 +59,26 @@
             ctx.fillText(`Speed: ${boatSpeed} kn`, boatEndX + 10, boatEndY - 5);
             ctx.fillText(`Angle: 0°`, boatEndX + 10, boatEndY + 10);
 
-            // Convert wind angle to match the new coordinate system
-            const adjustedWindAngle = (90 - windAngle + 360) % 360;
+            // Adjust wind angle for the compass system
+            const adjustedWindAngle = (windAngle - 90 + 360) % 360;
 
             // Draw wind direction (pointing to the boat)
-            const windEndX = centerX - windSpeed * 10 * Math.cos(adjustedWindAngle * Math.PI / 180);
-            const windEndY = centerY - windSpeed * 10 * Math.sin(adjustedWindAngle * Math.PI / 180);
+            const windEndX = centerX + windSpeed * 10 * Math.cos(adjustedWindAngle * Math.PI / 180);
+            const windEndY = centerY + windSpeed * 10 * Math.sin(adjustedWindAngle * Math.PI / 180);
             drawArrow(ctx, windEndX, windEndY, centerX, centerY, 'red');
             ctx.fillStyle = 'red';
-            ctx.fillText(`Windrichtung`, windEndX - 70, windEndY - 20);
-            ctx.fillText(`Speed: ${windSpeed} kn`, windEndX - 70, windEndY - 5);
-            ctx.fillText(`Angle: ${windAngle}°`, windEndX - 70, windEndY + 10);
+            ctx.fillText(`Windrichtung`, windEndX + 10, windEndY + 20);
+            ctx.fillText(`Speed: ${windSpeed} kn`, windEndX + 10, windEndY + 35);
+            ctx.fillText(`Angle: ${windAngle}°`, windEndX + 10, windEndY + 50);
 
             // Calculate and draw relative wind direction
-            const relWindX = windSpeed * Math.cos(adjustedWindAngle * Math.PI / 180) - boatSpeed * Math.cos(Math.PI / 2);
-            const relWindY = windSpeed * Math.sin(adjustedWindAngle * Math.PI / 180) - boatSpeed * Math.sin(Math.PI / 2);
+            const relWindX = windSpeed * Math.cos(adjustedWindAngle * Math.PI / 180) + boatSpeed * Math.cos(Math.PI / 2);
+            const relWindY = windSpeed * Math.sin(adjustedWindAngle * Math.PI / 180) + boatSpeed * Math.sin(Math.PI / 2);
             const relWindAngle = (Math.atan2(relWindY, relWindX) * 180 / Math.PI + 360) % 360;
             const relWindSpeed = Math.sqrt(relWindX * relWindX + relWindY * relWindY);
-            const relWindEndX = centerX - relWindX * 10;
-            const relWindEndY = centerY - relWindY * 10;
-            drawArrow(ctx, relWindEndX, relWindEndY, centerX, centerY, 'green');
+            const relWindEndX = centerX + relWindX * 10;
+            const relWindEndY = centerY + relWindY * 10;
+            drawArrow(ctx, centerX, centerY, relWindEndX, relWindEndY, 'green');
             ctx.fillStyle = 'green';
             ctx.fillText(`Relativer Wind`, relWindEndX - 100, relWindEndY - 20);
             ctx.fillText(`Speed: ${relWindSpeed.toFixed(2)} kn`, relWindEndX - 100, relWindEndY - 5);
