@@ -49,9 +49,9 @@
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
-            // Draw boat direction (to the right, in black)
-            const boatEndX = centerX + boatSpeed * 10;
-            const boatEndY = centerY;
+            // Draw boat direction (upwards, in black)
+            const boatEndX = centerX;
+            const boatEndY = centerY - boatSpeed * 10;
             drawArrow(ctx, centerX, centerY, boatEndX, boatEndY, 'black');
             ctx.fillStyle = 'black';
             ctx.font = '16px Arial';
@@ -59,9 +59,12 @@
             ctx.fillText(`Speed: ${boatSpeed} kn`, boatEndX + 10, boatEndY - 5);
             ctx.fillText(`Angle: 0°`, boatEndX + 10, boatEndY + 10);
 
+            // Convert wind angle to match the new coordinate system
+            const adjustedWindAngle = (90 - windAngle + 360) % 360;
+
             // Draw wind direction (pointing to the boat)
-            const windEndX = centerX - windSpeed * 10 * Math.cos(windAngle * Math.PI / 180);
-            const windEndY = centerY - windSpeed * 10 * Math.sin(windAngle * Math.PI / 180);
+            const windEndX = centerX - windSpeed * 10 * Math.cos(adjustedWindAngle * Math.PI / 180);
+            const windEndY = centerY - windSpeed * 10 * Math.sin(adjustedWindAngle * Math.PI / 180);
             drawArrow(ctx, windEndX, windEndY, centerX, centerY, 'red');
             ctx.fillStyle = 'red';
             ctx.fillText(`Windrichtung`, windEndX - 70, windEndY - 20);
@@ -69,9 +72,9 @@
             ctx.fillText(`Angle: ${windAngle}°`, windEndX - 70, windEndY + 10);
 
             // Calculate and draw relative wind direction
-            const relWindX = windSpeed * Math.cos(windAngle * Math.PI / 180) - boatSpeed;
-            const relWindY = windSpeed * Math.sin(windAngle * Math.PI / 180);
-            const relWindAngle = Math.atan2(relWindY, relWindX) * 180 / Math.PI;
+            const relWindX = windSpeed * Math.cos(adjustedWindAngle * Math.PI / 180) - boatSpeed * Math.cos(Math.PI / 2);
+            const relWindY = windSpeed * Math.sin(adjustedWindAngle * Math.PI / 180) - boatSpeed * Math.sin(Math.PI / 2);
+            const relWindAngle = (Math.atan2(relWindY, relWindX) * 180 / Math.PI + 360) % 360;
             const relWindSpeed = Math.sqrt(relWindX * relWindX + relWindY * relWindY);
             const relWindEndX = centerX - relWindX * 10;
             const relWindEndY = centerY - relWindY * 10;
