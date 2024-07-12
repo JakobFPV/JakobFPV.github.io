@@ -12,6 +12,9 @@
         canvas {
             border: 1px solid black;
             margin-top: 20px;
+            width: 70%; /* Adjust width to fit the layout */
+            max-width: 800px; /* Limit maximum width */
+            height: auto; /* Automatically adjust height */
         }
     </style>
 </head>
@@ -28,7 +31,7 @@
     
     <button onclick="calculateAndDraw()">Berechnen und Zeichnen</button>
     
-    <canvas id="canvas" width="600" height="600"></canvas>
+    <canvas id="canvas" width="840" height="840"></canvas>
     
     <script>
         function calculateAndDraw() {
@@ -49,43 +52,57 @@
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
 
+            // Zoom factor
+            const zoom = 12; // Adjust zoom factor for 120% enlargement (original zoom was 10)
+
             // Draw boat direction (upwards, in black)
             const boatEndX = centerX;
-            const boatEndY = centerY - boatSpeed * 10;
-            drawArrow(ctx, centerX, centerY, boatEndX, boatEndY, 'black');
+            const boatEndY = centerY - boatSpeed * zoom;
+            drawArrow(ctx, centerX, centerY, boatEndX, boatEndY, 'black', 2);
             ctx.fillStyle = 'black';
             ctx.font = '16px Arial';
-            ctx.fillText(`Fahrtrichtung`, boatEndX + 10, boatEndY - 20);
-            ctx.fillText(`Speed: ${boatSpeed} kn`, boatEndX + 10, boatEndY - 5);
-            ctx.fillText(`Angle: 0°`, boatEndX + 10, boatEndY + 10);
+            ctx.fillText(`Fahrtrichtung`, boatEndX + 10, boatEndY - 80); // Adjusted y position
+            ctx.fillText(`Speed: ${boatSpeed} kn`, boatEndX + 10, boatEndY - 65); // Adjusted y position
+            ctx.fillText(`Angle: 0°`, boatEndX + 10, boatEndY - 50); // Adjusted y position
 
             // Adjust wind angle for the compass system
             const adjustedWindAngle = (windAngle - 90 + 360) % 360;
 
-            // Draw wind direction (pointing to the boat)
-            const windEndX = centerX + windSpeed * 10 * Math.cos(adjustedWindAngle * Math.PI / 180);
-            const windEndY = centerY + windSpeed * 10 * Math.sin(adjustedWindAngle * Math.PI / 180);
-            drawArrow(ctx, windEndX, windEndY, centerX, centerY, 'red');
+            // Draw wind direction (pointing away from the boat)
+            const windEndX = centerX - windSpeed * zoom * Math.cos(adjustedWindAngle * Math.PI / 180);
+            const windEndY = centerY - windSpeed * zoom * Math.sin(adjustedWindAngle * Math.PI / 180);
+            drawArrow(ctx, centerX, centerY, windEndX, windEndY, 'red', 2);
             ctx.fillStyle = 'red';
-            ctx.fillText(`Windrichtung`, windEndX + 10, windEndY + 20);
-            ctx.fillText(`Speed: ${windSpeed} kn`, windEndX + 10, windEndY + 35);
-            ctx.fillText(`Angle: ${windAngle}°`, windEndX + 10, windEndY + 50);
+            ctx.fillText(`Windrichtung`, windEndX + 10, windEndY + 80); // Adjusted y position
+            ctx.fillText(`Speed: ${windSpeed} kn`, windEndX + 10, windEndY + 95); // Adjusted y position
+            ctx.fillText(`Angle: ${windAngle}°`, windEndX + 10, windEndY + 110); // Adjusted y position
 
             // Calculate and draw relative wind direction
-            const relWindX = windSpeed * Math.cos(adjustedWindAngle * Math.PI / 180) + boatSpeed * Math.cos(Math.PI / 2);
-            const relWindY = windSpeed * Math.sin(adjustedWindAngle * Math.PI / 180) + boatSpeed * Math.sin(Math.PI / 2);
-            const relWindAngle = (Math.atan2(relWindY, relWindX) * 180 / Math.PI + 360) % 360;
+            const relWindX = -windSpeed * Math.cos(adjustedWindAngle * Math.PI / 180) + boatSpeed * Math.cos(Math.PI / 2);
+            const relWindY = -windSpeed * Math.sin(adjustedWindAngle * Math.PI / 180) + boatSpeed * Math.sin(Math.PI / 2);
             const relWindSpeed = Math.sqrt(relWindX * relWindX + relWindY * relWindY);
-            const relWindEndX = centerX + relWindX * 10;
-            const relWindEndY = centerY + relWindY * 10;
-            drawArrow(ctx, centerX, centerY, relWindEndX, relWindEndY, 'green');
+            const relWindAngle = (Math.atan2(relWindY, relWindX) * 180 / Math.PI + 90 + 360) % 360; // Corrected angle calculation
+            const relWindEndX = centerX + relWindX * zoom;
+            const relWindEndY = centerY + relWindY * zoom;
+            drawArrow(ctx, centerX, centerY, relWindEndX, relWindEndY, 'green', 2);
             ctx.fillStyle = 'green';
-            ctx.fillText(`Relativer Wind`, relWindEndX - 100, relWindEndY - 20);
-            ctx.fillText(`Speed: ${relWindSpeed.toFixed(2)} kn`, relWindEndX - 100, relWindEndY - 5);
-            ctx.fillText(`Angle: ${relWindAngle.toFixed(2)}°`, relWindEndX - 100, relWindEndY + 10);
+            ctx.fillText(`Relativer Wind`, relWindEndX - 100, relWindEndY - 80); // Adjusted y position
+            ctx.fillText(`Speed: ${relWindSpeed.toFixed(2)} kn`, relWindEndX - 100, relWindEndY - 65); // Adjusted y position
+            ctx.fillText(`Angle: ${relWindAngle.toFixed(2)}°`, relWindEndX - 100, relWindEndY - 50); // Adjusted y position
+
+            // Calculate and draw headwind (opposite to boat direction)
+            const headWindX = boatSpeed * Math.cos(Math.PI / 2);
+            const headWindY = boatSpeed * Math.sin(Math.PI / 2);
+            const headWindEndX = centerX + headWindX * zoom;
+            const headWindEndY = centerY + headWindY * zoom;
+            drawArrow(ctx, centerX, centerY, headWindEndX, headWindEndY, 'blue', 2);
+            ctx.fillStyle = 'blue';
+            ctx.fillText(`Gegenwind`, headWindEndX + 10, headWindEndY + 50); // Adjusted y position
+            ctx.fillText(`Speed: ${boatSpeed} kn`, headWindEndX + 10, headWindEndY + 65); // Adjusted y position
+            ctx.fillText(`Angle: 180°`, headWindEndX + 10, headWindEndY + 80); // Adjusted y position
         }
 
-        function drawArrow(context, fromX, fromY, toX, toY, color) {
+        function drawArrow(context, fromX, fromY, toX, toY, color, lineWidth) {
             const headlen = 10; // length of head in pixels
             const dx = toX - fromX;
             const dy = toY - fromY;
@@ -95,7 +112,7 @@
             context.moveTo(fromX, fromY);
             context.lineTo(toX, toY);
             context.strokeStyle = color;
-            context.lineWidth = 4;
+            context.lineWidth = lineWidth;
             context.stroke();
 
             context.beginPath();
@@ -105,7 +122,7 @@
             context.lineTo(toX, toY);
             context.lineTo(toX - headlen * Math.cos(angle - Math.PI / 6), toY - headlen * Math.sin(angle - Math.PI / 6));
             context.strokeStyle = color;
-            context.lineWidth = 4;
+            context.lineWidth = lineWidth;
             context.stroke();
             context.fillStyle = color;
             context.fill();
